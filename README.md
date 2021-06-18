@@ -2,6 +2,11 @@ Tool to flush all buffered data to the disk.
 
 Typically when processes call the WriteFile function, data is written to an internal buffer controlled by the operating system, also known as Write-Back cache. Later, the cache manager's lazy writer thread wakes up and flushes the dirty pages to the actual disk. This tool simply flushes all dirty pages from the specified volume and causes them to be written to the disk.
 
+Download
+
+https://github.com/leonardomsft/Flusher/releases/download/0.1/Flusher.exe
+
+
 
 References
 
