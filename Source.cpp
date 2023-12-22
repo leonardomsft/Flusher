@@ -2,6 +2,17 @@
 #include <stdio.h>
 #include <chrono>
 
+
+void PrintUsage()
+{
+    wprintf(L"\n\nFlusher - Volume Flushing Tool \n");
+    wprintf(L"Created by Leonardo Fagundes. No rights reserved.\n");
+    wprintf(L"https://github.com/leonardomsft/Flusher\n\n");
+
+    wprintf(L"Usage: Flusher.exe <Volume Letter>\n\n");
+    wprintf(L"\tExample: Flusher.exe c:\n\n");
+}
+
 int wmain(int argc, wchar_t* argv[])
 {
     HANDLE hFile = NULL;
@@ -12,26 +23,38 @@ int wmain(int argc, wchar_t* argv[])
     auto start = std::chrono::high_resolution_clock::now();
     auto finish = std::chrono::high_resolution_clock::now();
     
-    if (argc == 2)
+
+    if (argc != 2)
     {
-        if (!_wcsicmp(argv[1], L"C:")) wcscpy_s(wszpath, L"\\\\.\\C:");
-        if (!_wcsicmp(argv[1], L"D:")) wcscpy_s(wszpath, L"\\\\.\\D:");
-        if (!_wcsicmp(argv[1], L"E:")) wcscpy_s(wszpath, L"\\\\.\\E:");
-        if (!_wcsicmp(argv[1], L"F:")) wcscpy_s(wszpath, L"\\\\.\\F:");
-        if (!_wcsicmp(argv[1], L"G:")) wcscpy_s(wszpath, L"\\\\.\\G:");
-        if (!_wcsicmp(argv[1], L"H:")) wcscpy_s(wszpath, L"\\\\.\\H:");
-        if (!_wcsicmp(argv[1], L"I:")) wcscpy_s(wszpath, L"\\\\.\\I:");
-        if (!_wcsicmp(argv[1], L"S:")) wcscpy_s(wszpath, L"\\\\.\\S:");
+        wprintf(L"ERROR: Invalid parameter.");
 
-    }
-
-
-    if (argc != 2 || wcsnlen(wszpath, MAX_PATH) != 6)
-    {
-        wprintf(L"ERROR: Missing Volume Letter. Please specify the Volume to flush.\n  Example: Flusher.exe C:\n");
+        PrintUsage();
 
         goto exit;
 
+    }
+
+    if (wcsnlen(argv[1], 10) != 2)
+    {
+        wprintf(L"ERROR: Invalid parameter.");
+
+        PrintUsage();
+
+        goto exit;
+
+    }
+
+    if (isalpha((char)argv[1][0]) && argv[1][1] == ':')
+    {
+        swprintf_s(wszpath, 10, L"\\\\.\\%s", argv[1]);
+    }
+    else
+    {
+        wprintf(L"ERROR: Invalid parameter.");
+
+        PrintUsage();
+
+        goto exit;
     }
 
 
@@ -45,7 +68,7 @@ int wmain(int argc, wchar_t* argv[])
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        wprintf(L"CreateFile ERROR: %d. Exiting.\n", GetLastError());
+        wprintf(L"ERROR %d attempting to open a volume handle.\n", GetLastError());
 
         goto exit;
     }
@@ -53,7 +76,7 @@ int wmain(int argc, wchar_t* argv[])
     //Flush
     if (!FlushFileBuffers(hFile))
     {
-        wprintf(L"FlushFileBuffers ERROR: %d. Exiting.\n", GetLastError());
+        wprintf(L"ERROR %d attempting to call FlushFileBuffers. Exiting.\n", GetLastError());
 
         goto exit;
     }
@@ -65,7 +88,7 @@ int wmain(int argc, wchar_t* argv[])
     //Calculate elapsed time
     elapsed = finish - start;
 
-    wprintf(L"Total elapsed time: %0.7f seconds\n", elapsed);
+    wprintf(L"SUCCESS flushing volume %s \nTotal elapsed time: %0.7f seconds\n", wszpath, elapsed);
 
 exit:
 
